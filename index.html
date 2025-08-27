@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader - Desktop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        dark: '#181818',
+                        darkCard: '#2a2a2a'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+        }
+        .custom-input:focus {
+            box-shadow: 0 0 0 3px rgba(93, 92, 222, 0.3);
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #5D5CDE 0%, #8B5FBF 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg text-white">
+    <script>
+        document.documentElement.classList.add('dark');
+    </script>
+
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+                YouTube Downloader
+            </h1>
+            <p class="text-gray-400">Download vídeos e áudio do YouTube - Versão Desktop</p>
+        </div>
+
+        <!-- Main Form -->
+        <div class="bg-darkCard rounded-2xl p-6 shadow-2xl border border-gray-700">
+            <!-- URL Input -->
+            <div class="mb-6">
+                <label for="urlInput" class="block text-sm font-medium mb-2 text-gray-300">
+                    URL do YouTube
+                </label>
+                <div class="flex gap-2">
+                    <input 
+                        type="url" 
+                        id="urlInput" 
+                        placeholder="https://www.youtube.com/watch?v=..." 
+                        class="flex-1 px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary custom-input transition-colors text-base"
+                    >
+                    <button 
+                        id="infoBtn" 
+                        class="px-4 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                        title="Obter informações do vídeo"
+                    >
+                        ℹ️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Video Info -->
+            <div id="videoInfo" class="mb-6 p-4 bg-gray-800 rounded-lg border border-gray-600 hidden">
+                <h3 class="font-medium mb-2 text-gray-300">Informações do Vídeo:</h3>
+                <div id="videoDetails" class="text-sm text-gray-400"></div>
+            </div>
+
+            <!-- Format Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium mb-3 text-gray-300">
+                    Formato de Download
+                </label>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label class="format-option cursor-pointer">
+                        <input type="radio" name="format" value="mp3" class="hidden">
+                        <div class="p-4 bg-gray-800 border border-gray-600 rounded-lg text-center hover:border-primary transition-colors">
+                            <div class="text-2xl mb-2">🎵</div>
+                            <div class="font-medium">MP3</div>
+                            <div class="text-xs text-gray-400">Apenas áudio</div>
+                        </div>
+                    </label>
+                    <label class="format-option cursor-pointer">
+                        <input type="radio" name="format" value="mp4-no-audio" class="hidden">
+                        <div class="p-4 bg-gray-800 border border-gray-600 rounded-lg text-center hover:border-primary transition-colors">
+                            <div class="text-2xl mb-2">🎬</div>
+                            <div class="font-medium">MP4</div>
+                            <div class="text-xs text-gray-400">Sem áudio</div>
+                        </div>
+                    </label>
+                    <label class="format-option cursor-pointer">
+                        <input type="radio" name="format" value="mp4-with-audio" class="hidden" checked>
+                        <div class="p-4 bg-gray-800 border border-gray-600 rounded-lg text-center hover:border-primary transition-colors">
+                            <div class="text-2xl mb-2">🎥</div>
+                            <div class="font-medium">MP4</div>
+                            <div class="text-xs text-gray-400">Com áudio</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Quality Selection -->
+            <div class="mb-6" id="qualitySection">
+                <label class="block text-sm font-medium mb-3 text-gray-300">
+                    Qualidade do Vídeo
+                </label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="quality-option cursor-pointer">
+                        <input type="radio" name="quality" value="1080p" class="hidden" checked>
+                        <div class="p-3 bg-gray-800 border border-gray-600 rounded-lg text-center hover:border-primary transition-colors">
+                            <div class="font-medium">1080p</div>
+                            <div class="text-xs text-gray-400">Full HD</div>
+                        </div>
+                    </label>
+                    <label class="quality-option cursor-pointer">
+                        <input type="radio" name="quality" value="4k" class="hidden">
+                        <div class="p-3 bg-gray-800 border border-gray-600 rounded-lg text-center hover:border-primary transition-colors">
+                            <div class="font-medium">4K</div>
+                            <div class="text-xs text-gray-400">Ultra HD</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Download Button -->
+            <button 
+                id="downloadBtn" 
+                class="w-full bg-primary hover:bg-purple-600 text-white font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-4 focus:ring-primary focus:ring-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <span id="btnText">Baixar Vídeo</span>
+                <span id="loadingSpinner" class="hidden">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Baixando...
+                </span>
+            </button>
+
+            <!-- Progress Bar -->
+            <div id="progressContainer" class="mt-4 hidden">
+                <div class="bg-gray-700 rounded-full h-2 mb-2">
+                    <div id="progressBar" class="progress-bar h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <div id="progressText" class="text-sm text-gray-400 text-center"></div>
+            </div>
+
+            <!-- Status Message -->
+            <div id="statusMessage" class="mt-4 p-3 rounded-lg hidden">
+                <div id="statusText" class="text-sm"></div>
+            </div>
+
+            <!-- Download Log -->
+            <div id="downloadLog" class="mt-4 hidden">
+                <h3 class="text-sm font-medium mb-2 text-gray-300">Log do Download:</h3>
+                <pre id="logContent" class="bg-gray-900 p-3 rounded text-xs text-gray-400 overflow-auto max-h-40"></pre>
+            </div>
+        </div>
+
+        <!-- Tools Status -->
+        <div id="toolsStatus" class="mt-6 p-4 rounded-lg border hidden">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium mb-2">Status das Ferramentas:</h3>
+                    <div id="toolsDetails" class="text-sm space-y-1"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="mt-6 bg-blue-900 bg-opacity-30 border border-blue-700 rounded-lg p-4">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-blue-400">Como usar:</h3>
+                    <ul class="mt-1 text-sm text-blue-300 list-disc list-inside">
+                        <li>Os downloads são salvos na pasta "Downloads" do programa</li>
+                        <li>Downloads em 4K com áudio usam ffmpeg automaticamente</li>
+                        <li>Para obter informações do vídeo, clique no botão ℹ️</li>
+                        <li>Se faltar alguma ferramenta, execute: <code class="bg-gray-700 px-1 rounded">npm run install-ytdlp</code></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle format selection visual feedback
+        document.querySelectorAll('.format-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.format-option div').forEach(div => {
+                    div.classList.remove('border-primary', 'bg-primary', 'bg-opacity-20');
+                    div.classList.add('border-gray-600');
+                });
+                
+                const div = this.querySelector('div');
+                div.classList.remove('border-gray-600');
+                div.classList.add('border-primary', 'bg-primary', 'bg-opacity-20');
+                
+                const format = this.querySelector('input').value;
+                const qualitySection = document.getElementById('qualitySection');
+                if (format === 'mp3') {
+                    qualitySection.style.display = 'none';
+                } else {
+                    qualitySection.style.display = 'block';
+                }
+            });
+        });
+
+        // Handle quality selection visual feedback
+        document.querySelectorAll('.quality-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.quality-option div').forEach(div => {
+                    div.classList.remove('border-primary', 'bg-primary', 'bg-opacity-20');
+                    div.classList.add('border-gray-600');
+                });
+                
+                const div = this.querySelector('div');
+                div.classList.remove('border-gray-600');
+                div.classList.add('border-primary', 'bg-primary', 'bg-opacity-20');
+            });
+        });
+
+        // Set initial selected states
+        document.querySelector('input[name="format"][value="mp4-with-audio"]').closest('.format-option').click();
+        document.querySelector('input[name="quality"][value="1080p"]').closest('.quality-option').click();
+
+        // Get video info
+        document.getElementById('infoBtn').addEventListener('click', async function() {
+            const url = document.getElementById('urlInput').value.trim();
+            
+            if (!url) {
+                showStatus('Por favor, insira uma URL do YouTube.', 'error');
+                return;
+            }
+
+            try {
+                setLoading(true, 'Obtendo informações...');
+                
+                const response = await fetch('/api/video-info', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showVideoInfo(data);
+                } else {
+                    showStatus(data.error || 'Erro ao obter informações do vídeo', 'error');
+                }
+            } catch (error) {
+                showStatus('Erro de conexão: ' + error.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Handle download
+        document.getElementById('downloadBtn').addEventListener('click', async function() {
+            const url = document.getElementById('urlInput').value.trim();
+            const format = document.querySelector('input[name="format"]:checked').value;
+            const quality = document.querySelector('input[name="quality"]:checked')?.value || '';
+            
+            if (!url) {
+                showStatus('Por favor, insira uma URL do YouTube.', 'error');
+                return;
+            }
+            
+            if (!url.includes('youtube.com/watch') && !url.includes('youtu.be/')) {
+                showStatus('Por favor, insira uma URL válida do YouTube.', 'error');
+                return;
+            }
+
+            try {
+                setLoading(true, 'Iniciando download...');
+                showProgress(0, 'Preparando download...');
+                
+                const response = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url, format, quality })
+                });
+
+                if (response.ok) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let logText = '';
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value);
+                        logText += chunk;
+                        updateDownloadLog(logText);
+
+                        // Parse progress from yt-dlp output
+                        const lines = chunk.split('\n');
+                        for (const line of lines) {
+                            if (line.includes('%')) {
+                                const match = line.match(/(\d+\.?\d*)%/);
+                                if (match) {
+                                    const percentage = parseFloat(match[1]);
+                                    showProgress(percentage, 'Baixando...');
+                                }
+                            }
+                        }
+                    }
+
+                    showStatus('Download concluído com sucesso! Verifique a pasta Downloads.', 'success');
+                    showProgress(100, 'Download concluído!');
+                } else {
+                    const error = await response.json();
+                    showStatus(error.error || 'Erro durante o download', 'error');
+                }
+            } catch (error) {
+                showStatus('Erro de conexão: ' + error.message, 'error');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        function setLoading(loading, text = 'Processando...') {
+            const btn = document.getElementById('downloadBtn');
+            const btnText = document.getElementById('btnText');
+            const spinner = document.getElementById('loadingSpinner');
+            
+            if (loading) {
+                btn.disabled = true;
+                btnText.classList.add('hidden');
+                spinner.classList.remove('hidden');
+                if (spinner.childNodes.length > 1) {
+                    spinner.childNodes[1].textContent = text;
+                }
+            } else {
+                btn.disabled = false;
+                btnText.classList.remove('hidden');
+                spinner.classList.add('hidden');
+                document.getElementById('progressContainer').classList.add('hidden');
+            }
+        }
+
+        function showProgress(percentage, text) {
+            const container = document.getElementById('progressContainer');
+            const bar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            container.classList.remove('hidden');
+            bar.style.width = percentage + '%';
+            progressText.textContent = text + ` (${percentage.toFixed(1)}%)`;
+        }
+
+        function showVideoInfo(info) {
+            const infoDiv = document.getElementById('videoInfo');
+            const detailsDiv = document.getElementById('videoDetails');
+            
+            const duration = info.duration ? Math.floor(info.duration / 60) + ':' + (info.duration % 60).toString().padStart(2, '0') : 'N/A';
+            const views = info.view_count ? info.view_count.toLocaleString() : 'N/A';
+            
+            detailsDiv.innerHTML = `
+                <p><strong>Título:</strong> ${info.title || 'N/A'}</p>
+                <p><strong>Canal:</strong> ${info.uploader || 'N/A'}</p>
+                <p><strong>Duração:</strong> ${duration}</p>
+                <p><strong>Visualizações:</strong> ${views}</p>
+            `;
+            
+            infoDiv.classList.remove('hidden');
+        }
+
+        function updateDownloadLog(logText) {
+            const logDiv = document.getElementById('downloadLog');
+            const logContent = document.getElementById('logContent');
+            
+            logDiv.classList.remove('hidden');
+            logContent.textContent = logText;
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            const statusText = document.getElementById('statusText');
+            
+            statusDiv.classList.remove('hidden', 'bg-red-900', 'bg-green-900', 'bg-blue-900', 'border-red-700', 'border-green-700', 'border-blue-700');
+            
+            switch(type) {
+                case 'error':
+                    statusDiv.classList.add('bg-red-900', 'border-red-700');
+                    break;
+                case 'success':
+                    statusDiv.classList.add('bg-green-900', 'border-green-700');
+                    break;
+                case 'info':
+                    statusDiv.classList.add('bg-blue-900', 'border-blue-700');
+                    break;
+            }
+            
+            statusText.textContent = message;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    statusDiv.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        document.getElementById('urlInput').addEventListener('input', function() {
+            const statusDiv = document.getElementById('statusMessage');
+            const infoDiv = document.getElementById('videoInfo');
+            if (!statusDiv.classList.contains('hidden')) {
+                statusDiv.classList.add('hidden');
+            }
+            if (!infoDiv.classList.contains('hidden')) {
+                infoDiv.classList.add('hidden');
+            }
+        });
+
+        // Check tools status on page load
+        async function checkToolsStatus() {
+            try {
+                const response = await fetch('/api/check-tools');
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('toolsStatus');
+                const detailsDiv = document.getElementById('toolsDetails');
+                const downloadBtn = document.getElementById('downloadBtn');
+                
+                const ytdlpStatus = data.ytdlp ? '✅ Instalado' : '❌ Não encontrado';
+                const ffmpegStatus = data.ffmpeg ? '✅ Instalado' : '❌ Não encontrado';
+                
+                detailsDiv.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span>🎬 yt-dlp:</span>
+                        <span class="${data.ytdlp ? 'text-green-400' : 'text-red-400'}">${ytdlpStatus}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span>🎵 ffmpeg:</span>
+                        <span class="${data.ffmpeg ? 'text-green-400' : 'text-red-400'}">${ffmpegStatus}</span>
+                    </div>
+                `;
+                
+                if (data.allReady) {
+                    statusDiv.classList.remove('border-yellow-600', 'bg-yellow-900');
+                    statusDiv.classList.add('border-green-600', 'bg-green-900', 'bg-opacity-30');
+                    statusDiv.querySelector('svg').classList.add('text-green-400');
+                } else {
+                    statusDiv.classList.remove('border-green-600', 'bg-green-900');
+                    statusDiv.classList.add('border-yellow-600', 'bg-yellow-900', 'bg-opacity-30');
+                    statusDiv.querySelector('svg').classList.add('text-yellow-400');
+                    downloadBtn.disabled = true;
+                    downloadBtn.title = 'Instale as ferramentas necessárias primeiro';
+                    
+                    if (!data.ytdlp || !data.ffmpeg) {
+                        detailsDiv.innerHTML += `
+                            <div class="mt-2 p-2 bg-yellow-800 bg-opacity-50 rounded text-yellow-200">
+                                ⚠️ Execute: <code class="bg-gray-700 px-1 rounded">npm run install-ytdlp</code>
+                            </div>
+                        `;
+                    }
+                }
+                
+                statusDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Erro ao verificar ferramentas:', error);
+            }
+        }
+
+        // Check tools on page load
+        checkToolsStatus();
+    </script>
+</body>
+</html>
