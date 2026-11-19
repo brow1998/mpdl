@@ -22,7 +22,7 @@ Before you begin, ensure you have the following installed:
 1.  Clone the repository:
 
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/brow1998/mpdl.git
     cd mpdl
     ```
 
@@ -66,13 +66,9 @@ Before you begin, ensure you have the following installed:
 
 2.  Open your web browser and navigate to `http://localhost:3000` to access the MPDL UI.
 
-## Contributing
-
-Contributions are welcome! Please submit pull requests following standard practices.
-
 ## License
 
-This project uses the default license.
+[MIT](LICENSE). Respect YouTube's terms of service and the rights to the content you download.
 
 ## Acknowledgments
 
